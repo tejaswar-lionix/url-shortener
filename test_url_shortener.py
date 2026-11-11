@@ -34,5 +34,20 @@ class ShortenerTests(unittest.TestCase):
             self.assertEqual(Shortener(path).resolve(code), "https://example.com")
 
 
+class DeleteTests(unittest.TestCase):
+    def test_delete_removes_existing_code(self):
+        from shortener import Shortener
+
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        self.assertTrue(shortener.delete(code))
+        self.assertIsNone(shortener.resolve(code))
+
+    def test_delete_returns_false_for_unknown_code(self):
+        from shortener import Shortener
+
+        self.assertFalse(Shortener().delete("missing"))
+
+
 if __name__ == "__main__":
     unittest.main()
