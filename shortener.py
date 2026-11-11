@@ -36,6 +36,14 @@ class Shortener:
     def resolve(self, code):
         return self._urls.get(code)
 
+    def delete(self, code):
+        """Remove a short code. Returns True when it existed."""
+        if code in self._urls:
+            del self._urls[code]
+            self._persist()
+            return True
+        return False
+
     def _persist(self):
         if not self.store_path:
             return
