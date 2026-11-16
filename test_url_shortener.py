@@ -34,6 +34,43 @@ class ShortenerTests(unittest.TestCase):
             self.assertEqual(Shortener(path).resolve(code), "https://example.com")
 
 
+class HitStatsTests(unittest.TestCase):
+    def test_resolve_increments_hits(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        shortener.resolve(code)
+        self.assertEqual(shortener.stats()[code], 1)
+
+    def test_repeated_resolves_accumulate(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        for _ in range(3):
+            shortener.resolve(code)
+        self.assertEqual(shortener.stats()[code], 3)
+
+    def test_unknown_code_does_not_create_hit(self):
+        shortener = Shortener()
+        self.assertIsNone(shortener.resolve("missing"))
+        self.assertEqual(shortener.stats(), {})
+
+    def test_hits_survive_persistence_roundtrip(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "links.json")
+            shortener = Shortener(path)
+            code = shortener.shorten("https://example.com")
+            shortener.resolve(code)
+            shortener.resolve(code)
+            self.assertEqual(Shortener(path).stats()[code], 2)
+
+    def test_stats_returns_a_copy(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        shortener.resolve(code)
+        stats = shortener.stats()
+        stats[code] = 99
+        self.assertEqual(shortener.stats()[code], 1)
+
+
 class DeleteTests(unittest.TestCase):
     def test_delete_removes_existing_code(self):
         from shortener import Shortener
