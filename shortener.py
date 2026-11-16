@@ -21,6 +21,7 @@ class Shortener:
         self.store_path = store_path
         self._counter = 0
         self._urls = {}
+        self._hits = {}
         if store_path and os.path.exists(store_path):
             self._restore()
 
@@ -34,7 +35,14 @@ class Shortener:
         return code
 
     def resolve(self, code):
-        return self._urls.get(code)
+        if code not in self._urls:
+            return None
+        self._hits[code] = self._hits.get(code, 0) + 1
+        self._persist()
+        return self._urls[code]
+
+    def stats(self):
+        return dict(self._hits)
 
     def delete(self, code):
         """Remove a short code. Returns True when it existed."""
@@ -48,10 +56,19 @@ class Shortener:
         if not self.store_path:
             return
         with open(self.store_path, "w", encoding="utf-8") as handle:
-            json.dump({"counter": self._counter, "urls": self._urls}, handle, indent=2)
+            json.dump(
+                {
+                    "counter": self._counter,
+                    "urls": self._urls,
+                    "hits": self._hits,
+                },
+                handle,
+                indent=2,
+            )
 
     def _restore(self):
         with open(self.store_path, encoding="utf-8") as handle:
             data = json.load(handle)
         self._counter = data.get("counter", 0)
         self._urls = data.get("urls", {})
+        self._hits = data.get("hits", {})
