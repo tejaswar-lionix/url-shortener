@@ -53,6 +53,9 @@ class Shortener:
     def stats(self):
         return dict(self._hits)
 
+    def list_links(self):
+        return dict(self._urls)
+
     def delete(self, code):
         """Remove a short code. Returns True when it existed."""
         if code in self._urls:

@@ -71,6 +71,24 @@ class HitStatsTests(unittest.TestCase):
         self.assertEqual(shortener.stats()[code], 1)
 
 
+class ListLinksTests(unittest.TestCase):
+    def test_list_links_returns_code_to_url(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        alias = shortener.shorten("https://example.org", alias="my-link")
+        self.assertEqual(
+            shortener.list_links(),
+            {code: "https://example.com", alias: "https://example.org"},
+        )
+
+    def test_list_links_returns_a_copy(self):
+        shortener = Shortener()
+        shortener.shorten("https://example.com")
+        links = shortener.list_links()
+        links["extra"] = "https://example.net"
+        self.assertNotIn("extra", shortener.list_links())
+
+
 class DeleteTests(unittest.TestCase):
     def test_delete_removes_existing_code(self):
         from shortener import Shortener
