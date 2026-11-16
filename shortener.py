@@ -2,8 +2,10 @@
 """Encode URLs as short base62 codes with optional JSON persistence."""
 import json
 import os
+import re
 
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ALIAS_PATTERN = re.compile(r"^[A-Za-z0-9_-]{3,32}$")
 
 
 def encode_id(number):
@@ -25,11 +27,18 @@ class Shortener:
         if store_path and os.path.exists(store_path):
             self._restore()
 
-    def shorten(self, url):
+    def shorten(self, url, alias=None):
         if not url.startswith(("http://", "https://")):
             raise ValueError("url must start with http:// or https://")
-        self._counter += 1
-        code = encode_id(self._counter)
+        if alias is not None:
+            if not ALIAS_PATTERN.match(alias):
+                raise ValueError("alias must be 3-32 letters, digits, _ or -")
+            if alias in self._urls:
+                raise ValueError("alias already in use")
+            code = alias
+        else:
+            self._counter += 1
+            code = encode_id(self._counter)
         self._urls[code] = url
         self._persist()
         return code

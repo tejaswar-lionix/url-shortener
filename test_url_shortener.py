@@ -86,5 +86,40 @@ class DeleteTests(unittest.TestCase):
         self.assertFalse(Shortener().delete("missing"))
 
 
+class AliasTests(unittest.TestCase):
+    def test_custom_alias_resolves(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com", alias="my-link")
+        self.assertEqual(code, "my-link")
+        self.assertEqual(shortener.resolve("my-link"), "https://example.com")
+
+    def test_invalid_alias_raises(self):
+        shortener = Shortener()
+        with self.assertRaises(ValueError):
+            shortener.shorten("https://example.com", alias="ab")
+        with self.assertRaises(ValueError):
+            shortener.shorten("https://example.com", alias="bad alias")
+
+    def test_duplicate_alias_raises(self):
+        shortener = Shortener()
+        shortener.shorten("https://example.com", alias="my-link")
+        with self.assertRaises(ValueError):
+            shortener.shorten("https://example.org", alias="my-link")
+
+    def test_alias_survives_persistence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "links.json")
+            Shortener(path).shorten("https://example.com", alias="my-link")
+            self.assertEqual(
+                Shortener(path).resolve("my-link"),
+                "https://example.com",
+            )
+
+    def test_auto_codes_continue_after_alias(self):
+        shortener = Shortener()
+        shortener.shorten("https://example.com", alias="my-link")
+        self.assertEqual(shortener.shorten("https://example.org"), encode_id(1))
+
+
 if __name__ == "__main__":
     unittest.main()
