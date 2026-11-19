@@ -8,6 +8,7 @@ Base62 URL shortener with JSON persistence.
 python3 -c "from shortener import *; s=Shortener(); print(s.shorten('https://example.com'))"
 python3 -c "from shortener import *; s=Shortener(); print(s.shorten('https://example.com', alias='my-link'))"
 python3 -c "from shortener import *; s=Shortener(); s.shorten('https://example.com'); s.resolve('1'); print(s.stats())"
+python3 -c "from shortener import *; s=Shortener(); s.shorten('https://example.com'); print(s.resolve_many(['1']))"
 python3 -c "from shortener import *; s=Shortener(); s.shorten('https://example.com'); print(s.list_links())"
 ```
 
@@ -17,6 +18,7 @@ python3 -c "from shortener import *; s=Shortener(); s.shorten('https://example.c
 - Custom aliases via Shortener.shorten(url, alias=None)
 - URL validation and persistence
 - Persisted hit counters with Shortener.stats()
+- Resolve several codes at once with Shortener.resolve_many(codes)
 - Delete short codes with Shortener.delete(code)
 - Inspect all links with Shortener.list_links()
 

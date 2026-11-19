@@ -50,6 +50,16 @@ class Shortener:
         self._persist()
         return self._urls[code]
 
+    def resolve_many(self, codes):
+        resolved = {}
+        for code in codes:
+            if code not in self._urls:
+                continue
+            self._hits[code] = self._hits.get(code, 0) + 1
+            resolved[code] = self._urls[code]
+        self._persist()
+        return resolved
+
     def stats(self):
         return dict(self._hits)
 
