@@ -71,6 +71,32 @@ class HitStatsTests(unittest.TestCase):
         self.assertEqual(shortener.stats()[code], 1)
 
 
+class ResolveManyTests(unittest.TestCase):
+    def test_resolves_known_and_omits_unknown_codes(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        alias = shortener.shorten("https://example.org", alias="my-link")
+        self.assertEqual(
+            shortener.resolve_many([code, "missing", alias]),
+            {
+                code: "https://example.com",
+                alias: "https://example.org",
+            },
+        )
+
+    def test_increments_hits_for_known_codes_only(self):
+        shortener = Shortener()
+        code = shortener.shorten("https://example.com")
+        shortener.resolve_many([code, "missing", code])
+        self.assertEqual(shortener.stats(), {code: 2})
+
+    def test_empty_input_returns_empty_dict(self):
+        shortener = Shortener()
+        shortener.shorten("https://example.com")
+        self.assertEqual(shortener.resolve_many([]), {})
+        self.assertEqual(shortener.stats(), {})
+
+
 class ListLinksTests(unittest.TestCase):
     def test_list_links_returns_code_to_url(self):
         shortener = Shortener()
