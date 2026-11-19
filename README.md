@@ -28,6 +28,10 @@ python3 -c "from shortener import *; s=Shortener(); s.shorten('https://example.c
 python3 -m unittest -q
 ```
 
+## Additional API
+
+- `Shortener.top_links(limit=5)` returns the most resolved links as code, URL, and hit counts.
+
 ## License
 
 MIT
