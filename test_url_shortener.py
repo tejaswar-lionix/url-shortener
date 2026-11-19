@@ -165,5 +165,26 @@ class AliasTests(unittest.TestCase):
         self.assertEqual(shortener.shorten("https://example.org"), encode_id(1))
 
 
+class TopLinksTests(unittest.TestCase):
+    def test_ranks_by_hits(self):
+        from shortener import Shortener
+
+        shortener = Shortener()
+        first = shortener.shorten("https://a.com")
+        second = shortener.shorten("https://b.com")
+        shortener.resolve(first)
+        shortener.resolve(first)
+        shortener.resolve(second)
+        top = shortener.top_links()
+        self.assertEqual([item["code"] for item in top], [first, second])
+        self.assertEqual(top[0]["hits"], 2)
+
+    def test_rejects_bad_limit(self):
+        from shortener import Shortener
+
+        with self.assertRaises(ValueError):
+            Shortener().top_links(0)
+
+
 if __name__ == "__main__":
     unittest.main()

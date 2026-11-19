@@ -74,6 +74,16 @@ class Shortener:
             return True
         return False
 
+    def top_links(self, limit=5):
+        """Return the most resolved links as code/url/hits dictionaries."""
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        ranked = sorted(self._hits.items(), key=lambda item: (-item[1], item[0]))
+        return [
+            {"code": code, "url": self._urls.get(code), "hits": hits}
+            for code, hits in ranked[:limit]
+        ]
+
     def _persist(self):
         if not self.store_path:
             return
